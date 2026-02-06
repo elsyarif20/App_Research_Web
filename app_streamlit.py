@@ -3,101 +3,164 @@ import pandas as pd
 from core_engine import ResearchEngine
 
 # --- CONFIG ---
-st.set_page_config(page_title="Ahim Research Pro | Liyas Syarifudin", layout="wide")
+st.set_page_config(
+    page_title="IBM Ahim Statistics Data Editor",
+    page_icon="📊",
+    layout="wide"
+)
 
-# --- CUSTOM CSS ---
+# --- CUSTOM CSS: THEMA SPSS CLASSIC ---
 st.markdown("""
     <style>
-    .main { background-color: #1e1e2e; color: #cad3f5; }
-    .stButton>button { width: 100%; border-radius: 5px; font-weight: bold; }
+    /* Mengatur background utama menjadi abu-abu terang khas Windows Klasik */
+    .stApp {
+        background-color: #f0f0f0;
+        color: black;
+    }
+
+    /* Navbar/Header ala Windows XP/7 */
+    .spss-header {
+        background: linear-gradient(to bottom, #ebebeb 0%, #d1d1d1 100%);
+        border-bottom: 2px solid #999;
+        padding: 10px;
+        margin-bottom: 20px;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    /* Styling Data Editor agar mirip grid SPSS */
+    [data-testid="stDataEditor"] {
+        border: 2px solid #718ca1;
+        background-color: white;
+    }
+
+    /* Sidebar dengan warna abu-abu menu */
+    section[data-testid="stSidebar"] {
+        background-color: #e1e1e1;
+        border-right: 2px solid #999;
+    }
+
+    /* Button bergaya standar software lama */
+    div.stButton > button:first-child {
+        background-color: #f5f5f5;
+        color: #333;
+        border: 1px solid #707070;
+        border-radius: 2px;
+        font-size: 13px;
+    }
+    
+    div.stButton > button:hover {
+        background-color: #e5f1fb;
+        border: 1px solid #0078d7;
+    }
+
+    /* Tab Bergaya Data View / Variable View */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #dcdcdc;
+        border-top: 1px solid #999;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        border: 1px solid #999;
+        background-color: #f0f0f0;
+        padding: 5px 15px;
+        margin-right: 2px;
+        font-size: 12px;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background-color: #fff !important;
+        border-bottom: none !important;
+        font-weight: bold;
+    }
+    
+    /* Font kecil khas tabel statistik */
+    p, span, label {
+        font-size: 13px !important;
+        color: #333 !important;
+    }
     </style>
+    """, unsafe_allow_html=True)
+
+# --- SPSS STYLE HEADER ---
+st.markdown("""
+    <div class="spss-header">
+        <span style="font-weight:bold; color:#003366;">*Untitled1 [DataSet1] - IBM Ahim Statistics Data Editor</span>
+    </div>
     """, unsafe_allow_html=True)
 
 # --- SESSION STATE (DATABASE) ---
 if 'df' not in st.session_state:
-    # Template awal penelitian sekolah
     data = {
-        'Responden': [f'Siswa {i}' for i in range(1, 6)],
-        'Item_1': [5, 4, 3, 5, 4],
-        'Item_2': [4, 4, 2, 5, 3],
-        'Pre_Test': [60, 65, 50, 70, 62],
-        'Post_Test': [85, 80, 75, 90, 82]
+        'id': [1, 2, 3, 4, 5],
+        'gender': ['Male', 'Male', 'Female', 'Female', 'Male'],
+        'bdate': ['02/03/1952', '05/23/1958', '07/26/1929', '04/15/1947', '02/09/1955'],
+        'salary': [57000, 40200, 21450, 21900, 45000],
+        'jobcat': ['Manager', 'Clerical', 'Clerical', 'Clerical', 'Clerical']
     }
     st.session_state.df = pd.DataFrame(data)
 
-# --- SIDEBAR: KONTROL DATA ---
+# --- SIDEBAR MENU ---
 with st.sidebar:
-    st.title("🛠️ Control Panel")
-    st.info(f"Developer: Liyas Syarifudin\nLokasi: SMA Islam Al Ghozali")
-    
-    st.subheader("Manajemen Kolom")
-    new_col = st.text_input("Nama Variabel Baru:")
-    if st.button("➕ Tambah Kolom"):
-        if new_col:
-            st.session_state.df[new_col] = 0
-            st.rerun()
-
-    st.subheader("Eksternal Data")
-    uploaded_file = st.file_uploader("Upload Excel/CSV", type=['xlsx', 'csv'])
+    st.markdown("### Menu")
+    uploaded_file = st.file_uploader("📂 Open Data (.sav, .csv, .xlsx)", type=['xlsx', 'csv'])
     if uploaded_file:
         imported = ResearchEngine.load_external_file(uploaded_file)
         if imported is not None:
             st.session_state.df = imported
-            st.success("Data Berhasil Dimuat!")
+            st.rerun()
+            
+    st.divider()
+    st.button("➕ Add Variable")
+    st.button("🗑️ Delete Case")
 
-# --- MAIN DASHBOARD ---
-st.title("🚀 Ahim Research Pro - Dashboard Riset")
-st.divider()
+# --- MAIN VIEW: DATA VIEW & VARIABLE VIEW TABS ---
+# Meniru navigasi bawah SPSS
+tab_data, tab_var, tab_analyze = st.tabs(["Data View", "Variable View", "Analyze"])
 
-# Layout: Spreadsheet di atas, Analisis di bawah
-st.subheader("📊 Spreadsheet Editor (Excel-Like)")
-edited_df = st.data_editor(st.session_state.df, num_rows="dynamic", use_container_width=True)
-st.session_state.df = edited_df
-
-st.divider()
-
-# --- BAGIAN ANALISIS ---
-st.subheader("🧪 Laboratory Analisis")
-tab1, tab2, tab3 = st.tabs(["🎯 Validitas Butir", "📈 Regresi & Pengaruh", "⚖️ Uji T (Beda Rata-rata)"])
-
-cols = st.session_state.df.columns.tolist()
-
-with tab1:
-    st.markdown("### Uji Validitas Instrumen")
-    items = st.multiselect("Pilih Butir Kuesioner (Item Soal):", cols)
-    if st.button("Jalankan Uji Validitas"):
-        if items:
-            res_val = ResearchEngine.run_item_validity(st.session_state.df, items)
-            st.table(res_val)
-        else: st.warning("Pilih butir dulu!")
-
-with tab2:
-    st.markdown("### Uji Regresi Linear Berganda")
-    c1, c2 = st.columns(2)
-    with c1: x_vars = st.multiselect("Variabel Bebas (X):", cols)
-    with c2: y_var = st.selectbox("Variabel Terikat (Y):", cols)
+with tab_data:
+    # Menampilkan jumlah variabel aktif seperti di gambar
+    st.caption(f"Visible: {len(st.session_state.df.columns)} of {len(st.session_state.df.columns)} Variables")
     
-    if st.button("Hitung Pengaruh"):
-        if x_vars and y_var:
-            model, narasi = ResearchEngine.run_dynamic_regression(st.session_state.df, x_vars, y_var)
-            if model:
-                st.write(narasi, unsafe_allow_html=True)
-                st.pyplot(ResearchEngine.generate_chart(st.session_state.df, x_vars[0], y_var))
-        else: st.warning("Lengkapi variabel X dan Y!")
+    # Spreadsheet Editor
+    edited_df = st.data_editor(
+        st.session_state.df, 
+        num_rows="dynamic", 
+        use_container_width=True,
+        height=500,
+        hide_index=False # Menampilkan nomor baris seperti SPSS
+    )
+    st.session_state.df = edited_df
 
-with tab3:
-    st.markdown("### Uji Beda (Independent T-Test)")
-    t1, t2 = st.columns(2)
-    with t1: var1 = st.selectbox("Kelompok A (Misal: Pre-test):", cols)
-    with t2: var2 = st.selectbox("Kelompok B (Misal: Post-test):", cols)
+with tab_var:
+    st.subheader("Variable Definitions")
+    # Menampilkan info kolom
+    var_info = pd.DataFrame({
+        'Name': st.session_state.df.columns,
+        'Type': ['Numeric' if pd.api.types.is_numeric_dtype(st.session_state.df[c]) else 'String' for c in st.session_state.df.columns],
+        'Width': [8] * len(st.session_state.df.columns),
+        'Label': st.session_state.df.columns
+    })
+    st.table(var_info)
+
+with tab_analyze:
+    st.subheader("Statistical Procedures")
+    col1, col2 = st.columns(2)
     
-    if st.button("Bandingkan Data"):
-        t_stat, p_val, narasi_t = ResearchEngine.run_t_test(st.session_state.df, var1, var2)
-        if t_stat:
-            st.metric("P-Value", p_val)
-            st.write(narasi_t, unsafe_allow_html=True)
+    with col1:
+        st.write("--- Descriptive Statistics ---")
+        items_x = st.multiselect("Select Variables (X):", st.session_state.df.columns)
+        y_var = st.selectbox("Select Dependent (Y):", st.session_state.df.columns)
+        
+    with col2:
+        st.write("--- Results ---")
+        if st.button("Run Regression Analysis"):
+            if items_x and y_var:
+                model, narasi = ResearchEngine.run_dynamic_regression(st.session_state.df, items_x, y_var)
+                st.info(narasi)
 
-# --- DOWNLOAD AREA ---
-st.divider()
-csv_data = st.session_state.df.to_csv(index=False).encode('utf-8')
-st.download_button("📥 Download Data CSV", data=csv_data, file_name="data_ahim_pro.csv")
+# --- FOOTER STATUS BAR ---
+st.markdown("""
+    <div style="position: fixed; bottom: 0; left: 0; width: 100%; background: #f0f0f0; border-top: 1px solid #999; padding: 2px 10px; font-size: 11px;">
+        IBM Ahim Statistics Processor is ready | Unicode: ON
+    </div>
+    """, unsafe_allow_html=True)
