@@ -4,7 +4,7 @@ from core_engine import ResearchEngine
 
 # --- CONFIG ---
 st.set_page_config(
-    page_title="IBM Ahim Statistics Data Editor",
+    page_title="Ahim Statistics Data Editor",
     page_icon="📊",
     layout="wide"
 )
@@ -164,3 +164,4 @@ st.markdown("""
         IBM Ahim Statistics Processor is ready | Unicode: ON
     </div>
     """, unsafe_allow_html=True)
+
