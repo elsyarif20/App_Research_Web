@@ -1,0 +1,14 @@
+# --- Antarmuka (UI) ---
+PyQt6
+streamlit
+
+# --- Pengolahan Data & Statistik ---
+pandas
+numpy
+scipy
+statsmodels
+openpyxl
+
+# --- Visualisasi & Dokumen ---
+matplotlib
+python-docx
