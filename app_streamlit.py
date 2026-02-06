@@ -84,7 +84,7 @@ st.markdown("""
 # --- SPSS STYLE HEADER ---
 st.markdown("""
     <div class="spss-header">
-        <span style="font-weight:bold; color:#003366;">*Untitled1 [DataSet1] - IBM Ahim Statistics Data Editor</span>
+        <span style="font-weight:bold; color:#003366;">*Untitled1 [DataSet1] - Ahim Statistics Data Editor</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -164,4 +164,5 @@ st.markdown("""
         IBM Ahim Statistics Processor is ready | Unicode: ON
     </div>
     """, unsafe_allow_html=True)
+
 
